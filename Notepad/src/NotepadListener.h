@@ -22,27 +22,24 @@
 
 using namespace DirectUI;
 
+namespace DirectUI
+{
+    struct ThumbDragEvent : public Event
+    {
+        SIZE sizeDelta;
+    };
+}
+
 namespace Leet {
 namespace UI {
 namespace DuiKit {
 namespace Notepad
 {
-    struct ThumbDragEvent : InputEvent
-    {
-        SIZE sizeDelta;
-    };
-
-    struct KeyboardEvent : InputEvent
-    {
-        WCHAR ch;
-        WORD cRep;
-        WORD wFlags;
-    };
-
     class NotepadListener : public IElementListener
     {
     private:
         NotepadWindow* _pWindow;
+
     public:
         NotepadListener(NotepadWindow* window) 
         {
@@ -50,22 +47,18 @@ namespace Notepad
             _pWindow->AddListener(this);
         }
 
-        void OnListenerAttach(Element* elem) override { }
-        void OnListenerDetach(Element* elem) override { }
+        void OnListenerAttach(Element* peFrom) override { }
+        void OnListenerDetach(Element* peFrom) override { }
+        bool OnListenedPropertyChanging(Element* peFrom, const PropertyInfo* ppi, int iIndex, Value* pvOld, Value* pvNew) override { return true;}
+        void OnListenedPropertyChanged(Element* peFrom, const PropertyInfo* ppi, int iIndex, Value* pvOld, Value* pvNew) override { }
 
-        bool OnPropertyChanging(Element* elem, const PropertyInfo* prop, int unk, Value* v1, Value* v2) override {
-            return true;
-        }
-
-        void OnListenedPropertyChanged(Element* elem, const PropertyInfo* prop, int type, Value* v1, Value* v2) override { }
-        void OnListenedEvent(Element* elem, struct Event* pEvent) override
+        void OnListenedInput(Element* peFrom, InputEvent* pInput) override
         {
-            _pWindow->OnEvent(elem, pEvent);
+            _pWindow->OnInput(peFrom, pInput);
         }
-
-        void OnListenedInput(Element* elem, struct InputEvent* pie) override
+        void OnListenedEvent(Element* peFrom, Event* pEvent) override
         {
-            _pWindow->OnInput(elem, pie);
+            _pWindow->OnEvent(peFrom, pEvent);
         }
     };
 

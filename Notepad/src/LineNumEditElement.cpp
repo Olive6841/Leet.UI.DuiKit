@@ -17,7 +17,7 @@
  */
 
 #include "LineNumEditElement.h"
-#include "ClassInfo.h"
+//#include "ClassInfo.h"
 #include <new>
 #include <exception>
 
@@ -60,30 +60,6 @@ typedef struct GMSG_SYNCADAPTOR {
     UINT nCode;
 };
 
-struct KeyboardEvent : InputEvent
-{
-    WCHAR ch;
-    WORD cRep;
-    WORD wFlags;
-};
-
-typedef struct MouseEvent : InputEvent
-{
-    POINT ptClientPxl;
-    BYTE bButton;
-    UINT nFlags;
-};
-
-typedef struct MouseClickEvent : MouseEvent
-{
-    UINT cClicks;
-};
-
-typedef struct MouseWheelEvent : MouseEvent
-{
-    short sWheel;
-};
-
 const UINT win32MouseMap[7][3] =
 {
     // GBUTTON_LEFT         GBUTTON_RIGHT       GBUTTON_MIDDLE
@@ -97,7 +73,7 @@ const UINT win32MouseMap[7][3] =
 
 HRESULT LineNumEditElement::Register()
 {
-    return DirectUI::ClassInfo<LineNumEditElement, DirectUI::Element>::Register(GetModuleHandleW(NULL));
+    return DirectUI::ClassInfo<LineNumEditElement, DirectUI::Element>::RegisterGlobal(GetModuleHandleW(NULL), L"LineNumEditElement", nullptr, 0);
 }
 
 bool LineNumEditElement::GetKeyFocused()
@@ -111,12 +87,12 @@ void LineNumEditElement::SetKeyFocus()
     SetFocus(_hWndCtrl);
 }
 
-UCString LineNumEditElement::GetContentStringAsDisplayed(Value** val)
+LPCWSTR LineNumEditElement::GetContentStringAsDisplayed(Value** val)
 {
     if (_hWndCtrl)
     {
         int charCount = GetWindowTextLengthW(_hWndCtrl);
-        UString windowText = (UString)malloc(sizeof(wchar_t) * (charCount + 1));
+        LPCWSTR windowText = (LPCWSTR)malloc(sizeof(wchar_t) * (charCount + 1));
         GetWindowTextW(_hWndCtrl, (LPWSTR)windowText, charCount + 1);
         return windowText;
     }
@@ -201,7 +177,6 @@ void LineNumEditElement::OnHosted(DirectUI::Element* pNewHost)
         SetWindowSubclass(_hWndCtrl, ctrlSubclassProc, (UINT_PTR)_hWndCtrl, reinterpret_cast<DWORD_PTR>(this));
 
         // Listen for adaptor messages (needed for forwarding input)
-        void(*SetGadgetStyle)(HGADGET hgadChange, UINT nNewStyle, UINT nMask) = (void(*)(HGADGET hgadChange, UINT nNewStyle, UINT nMask))GetProcAddress(GetModuleHandleW(L"duser.dll"), "SetGadgetStyle");
         SetGadgetStyle(GetDisplayNode(), GS_ADAPTOR, GS_ADAPTOR);
 
         SetVisible(true);
@@ -253,9 +228,9 @@ void LineNumEditElement::OnPropertyChanged(const DirectUI::PropertyInfo* pPi, in
     }
 }
 
-HRESULT LineNumEditElement::CreateInstance(DirectUI::Element* rootElement, unsigned long* debugVariable, DirectUI::Element** newElement)
+HRESULT LineNumEditElement::CreateInstance(DirectUI::Element* pParent, DWORD* pdwDeferCookie, DirectUI::Element** ppElement)
 {
-    int hr = E_OUTOFMEMORY;
+    HRESULT hr = E_OUTOFMEMORY;
 
     // Using HeapAlloc instead of new() is required as DirectUI::Element::DisplayNodeCallback calls HeapFree() with the element
     LineNumEditElement* instance = (LineNumEditElement*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(LineNumEditElement));
@@ -263,16 +238,16 @@ HRESULT LineNumEditElement::CreateInstance(DirectUI::Element* rootElement, unsig
     if (instance != NULL)
     {
         new (instance) LineNumEditElement();
-        hr = instance->Initialize(0, rootElement, debugVariable);
+        hr = instance->Initialize(0, pParent, pdwDeferCookie);
         if (SUCCEEDED(hr))
         {
-            *newElement = instance;
+            *ppElement = instance;
         }
         else
         {
             if (instance != NULL)
             {
-                instance->Destroy(TRUE);
+                instance->Destroy(true);
                 instance = NULL;
             }
         }
@@ -284,7 +259,7 @@ HRESULT LineNumEditElement::CreateInstance(DirectUI::Element* rootElement, unsig
 HWND LineNumEditElement::CreateHWND(HWND hwndParent)
 {
     // TODO: Custom scrollbars
-    int dwStyle = WS_CHILD | WS_VISIBLE | WS_HSCROLL | ES_MULTILINE | WS_VSCROLL;
+    DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_HSCROLL | ES_MULTILINE | WS_VSCROLL;
     HWND hwndEdit = CreateWindowExW(0, L"LineNumEdit", NULL, dwStyle, 0, 0, GetWidth(), GetHeight(), hwndParent, (HMENU)1, NULL, NULL);
     return hwndEdit;
 }
@@ -459,11 +434,11 @@ LRESULT LineNumEditElement::sinkSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam
         if (HIWORD(wParam) == EN_CHANGE)
         {
             ::KeyboardEvent keyEvent;
-            keyEvent.flag = GMF_DIRECT;
-            keyEvent.device = GINPUT_KEYBOARD;
+            keyEvent.nStage = GMF_DIRECT;
+            keyEvent.nDevice = GINPUT_KEYBOARD;
             keyEvent.ch = VK_F13;
-            keyEvent.code = (DUSER_INPUT_CODE)0;
-            if (keyEvent.code > 2) keyEvent.code = (DUSER_INPUT_CODE)(keyEvent.code - 1);
+            keyEvent.nCode = (DUSER_INPUT_CODE)0;
+            if (keyEvent.nCode > 2) keyEvent.nCode = (DUSER_INPUT_CODE)(keyEvent.nCode - 1);
 
             phh->GetRoot()->OnInput(&keyEvent);
         }
@@ -532,11 +507,11 @@ LRESULT LineNumEditElement::ctrlSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam
         if (wParam == VK_F5 || wParam == VK_F6 || wParam == VK_F7 || wParam == 'R')
         {
             ::KeyboardEvent keyEvent;
-            keyEvent.flag = GMF_DIRECT;
-            keyEvent.device = GINPUT_KEYBOARD;
+            keyEvent.nStage = GMF_DIRECT;
+            keyEvent.nDevice = GINPUT_KEYBOARD;
             keyEvent.ch = wParam;
-            keyEvent.code = (DUSER_INPUT_CODE)(uMsg - WM_KEYDOWN);
-            if (keyEvent.code > 2) keyEvent.code = (DUSER_INPUT_CODE)(keyEvent.code - 1);
+            keyEvent.nCode = (DUSER_INPUT_CODE)(uMsg - WM_KEYDOWN);
+            if (keyEvent.nCode > 2) keyEvent.nCode = (DUSER_INPUT_CODE)(keyEvent.nCode - 1);
 
             phh->GetRoot()->OnInput(&keyEvent);
         }
