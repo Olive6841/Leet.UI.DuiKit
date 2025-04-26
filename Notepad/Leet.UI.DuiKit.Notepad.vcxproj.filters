@@ -30,9 +30,6 @@
     <ClCompile Include="src\LineNumEditElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ClassInfo.h">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="DirectUI\DirectUI.def">

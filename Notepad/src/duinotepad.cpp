@@ -35,7 +35,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     HRESULT hRes;
 
     // Initialize DUI within the process
-    hRes = InitProcessPriv(14, NULL, 0, true);
+    hRes = InitProcessPriv(14, NULL, 0, true, true);
 
     // Intialize DUI within the thread
     hRes = InitThread(2);

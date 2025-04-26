@@ -1,2 +1,2 @@
 # Direct UI headers
-Taken from the dui70 repository as hosted by MishaProductions [here](https://github.com/MishaProductions/dui70). The original author is still unclear to me, but it is licensed under the MIT license. See LICENSE.md for more info. Note that some slight changes were made to accomodate the headers for my own projects.
+Taken from the dui70 repository as hosted by Olive6841 (Under the explorer7 organization) [here](https://github.com/explorer7-team/dui70). See LICENSE.md for more info.
