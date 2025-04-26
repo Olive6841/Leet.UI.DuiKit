@@ -455,8 +455,8 @@ void NotepadWindow::OnEvent(Element* elem, Event* pEvent)
 
 void NotepadWindow::Refresh(bool showError)
 {
-	unsigned long defer;
-	_pWindowElement->StartDefer(&defer);
+	DWORD dwDefer;
+	_pWindowElement->StartDefer(&dwDefer);
 
 	// Remove all children from container
 	_pContainer->DestroyAll(true);
@@ -482,8 +482,8 @@ void NotepadWindow::Refresh(bool showError)
 			pParser->CreateElement(reinterpret_cast<LPCWSTR>(L"main"), NULL, NULL, 0, &pe);
 			if (pe)
 			{
-				// DirectUIElementAdd(_pContainer, pe);
-				pe->Add(_pContainer);
+				//pe->Add(_pContainer);
+				_pContainer->Add(pe);
 			}
 		}
 		else
@@ -525,7 +525,7 @@ void NotepadWindow::Refresh(bool showError)
 	else
 		free((LPWSTR)pTextW);
 
-	_pWindowElement->EndDefer(defer);
+	_pWindowElement->EndDefer(dwDefer);
 }
 
 

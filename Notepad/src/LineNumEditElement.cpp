@@ -73,7 +73,7 @@ const UINT win32MouseMap[7][3] =
 
 HRESULT LineNumEditElement::Register()
 {
-    return DirectUI::ClassInfo<LineNumEditElement, DirectUI::Element>::RegisterGlobal(GetModuleHandleW(NULL), L"LineNumEditElement", nullptr, 0);
+    return DirectUI::ClassInfo<LineNumEditElement, DirectUI::Element>::RegisterGlobal(GetModuleHandle(NULL), L"LineNumEdit", nullptr, 0);
 }
 
 bool LineNumEditElement::GetKeyFocused()
@@ -132,12 +132,12 @@ void LineNumEditElement::OnInput(InputEvent* event)
 
 }
 
-void LineNumEditElement::OnHosted(DirectUI::Element* pNewHost)
+void LineNumEditElement::OnHosted(DirectUI::Element* peNewRoot)
 {
     // TODO: Make sure new host is HWND, otherwise this won't work
-    HWND hwndRoot = ((HWNDElement*)pNewHost)->GetHWND();
+    HWND hwndRoot = ((HWNDElement*)peNewRoot)->GetHWND();
 
-    Element::OnHosted(pNewHost);
+    Element::OnHosted(peNewRoot);
 
     if (!_hWndSink)
     {
@@ -177,6 +177,7 @@ void LineNumEditElement::OnHosted(DirectUI::Element* pNewHost)
         SetWindowSubclass(_hWndCtrl, ctrlSubclassProc, (UINT_PTR)_hWndCtrl, reinterpret_cast<DWORD_PTR>(this));
 
         // Listen for adaptor messages (needed for forwarding input)
+        void(*SetGadgetStyle)(HGADGET hgadChange, UINT nNewStyle, UINT nMask) = (void(*)(HGADGET hgadChange, UINT nNewStyle, UINT nMask))GetProcAddress(GetModuleHandleW(L"duser.dll"), "SetGadgetStyle");
         SetGadgetStyle(GetDisplayNode(), GS_ADAPTOR, GS_ADAPTOR);
 
         SetVisible(true);
@@ -228,32 +229,9 @@ void LineNumEditElement::OnPropertyChanged(const DirectUI::PropertyInfo* pPi, in
     }
 }
 
-HRESULT LineNumEditElement::CreateInstance(DirectUI::Element* pParent, DWORD* pdwDeferCookie, DirectUI::Element** ppElement)
+HRESULT LineNumEditElement::Create(DirectUI::Element* pParent, DWORD* pdwDeferCookie, DirectUI::Element** ppElement)
 {
-    HRESULT hr = E_OUTOFMEMORY;
-
-    // Using HeapAlloc instead of new() is required as DirectUI::Element::DisplayNodeCallback calls HeapFree() with the element
-    LineNumEditElement* instance = (LineNumEditElement*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(LineNumEditElement));
-
-    if (instance != NULL)
-    {
-        new (instance) LineNumEditElement();
-        hr = instance->Initialize(0, pParent, pdwDeferCookie);
-        if (SUCCEEDED(hr))
-        {
-            *ppElement = instance;
-        }
-        else
-        {
-            if (instance != NULL)
-            {
-                instance->Destroy(true);
-                instance = NULL;
-            }
-        }
-    }
-    
-    return hr;
+    return DirectUI::CreateAndInit<LineNumEditElement, int>(0, pParent, pdwDeferCookie, ppElement);
 }
 
 HWND LineNumEditElement::CreateHWND(HWND hwndParent)

@@ -35,11 +35,11 @@ public:
 	virtual LPCWSTR GetContentStringAsDisplayed(class Value**) override;
 
 	virtual UINT MessageCallback(GMSG* pMsg) override;
-	virtual void OnHosted(DirectUI::Element*) override;
+	virtual void OnHosted(DirectUI::Element* peNewRoot) override;
 	virtual void OnInput(DirectUI::InputEvent*) override;
 	virtual void OnPropertyChanged(const DirectUI::PropertyInfo*, int index, Value* pOld, Value* pNew) override;
 
-	static HRESULT CreateInstance(DirectUI::Element* pParent, DWORD* pdwDeferCookie, DirectUI::Element** ppElement);
+	static HRESULT Create(DirectUI::Element* pParent, DWORD* pdwDeferCookie, DirectUI::Element** ppElement);
 
 	void SyncVisible();
 	void SyncRect(UINT nChangeFlags, bool bForceSync = false, Value* pNewSize = nullptr, Value* pNewPoint = nullptr);
