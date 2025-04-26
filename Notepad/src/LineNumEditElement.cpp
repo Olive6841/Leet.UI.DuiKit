@@ -53,10 +53,9 @@
 #define GS_ADAPTOR          0x00004000      // Requires extra notifications to host
 
 DirectUI::IClassInfo* LineNumEditElement::Class = NULL;
-typedef struct GMSG_SYNCADAPTOR {
-    GMSG baseMsg;
-    UINT garbage1;
-    UINT garbage2;
+
+typedef struct GMSG_SYNCADAPTOR : public EventMsg
+{
     UINT nCode;
 };
 

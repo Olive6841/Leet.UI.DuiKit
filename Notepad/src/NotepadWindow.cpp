@@ -482,7 +482,6 @@ void NotepadWindow::Refresh(bool showError)
 			pParser->CreateElement(reinterpret_cast<LPCWSTR>(L"main"), NULL, NULL, 0, &pe);
 			if (pe)
 			{
-				//pe->Add(_pContainer);
 				_pContainer->Add(pe);
 			}
 		}
