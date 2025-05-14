@@ -1,0 +1,3 @@
+[submodule "DirectUI"]
+	path = Notepad/src/include
+	url = https://github.com/explorer7-team/dui70
