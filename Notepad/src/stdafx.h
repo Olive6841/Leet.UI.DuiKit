@@ -58,7 +58,7 @@
 
 // Include DirectUI 7 headers
 #define GADGET_ENABLE_TRANSITIONS
-//#include <duser.h>
+#include "include/DirectUI/DUser/DUser.h"
 #include "include/DirectUI/DirectUI/DirectUI.h"
 
 // Include resources
